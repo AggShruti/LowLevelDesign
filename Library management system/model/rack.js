@@ -4,7 +4,7 @@ class Rack{
         this.isAvailble = true;
     }
     static racks = 0;
-    bookCopyId;
+    bookCopy;
     isAvailble
     static createRack(){
         return new Rack();
@@ -12,18 +12,21 @@ class Rack{
     getRackId(){
         return this._id;
     }
-    addBookToRack(bookCopyId){
-        this.bookCopyId = bookCopyId;
+    addBookToRack(bookCopy){
+        this.bookCopy = bookCopy;
         this.isAvailble = false;
-        return [ this.bookCopyId, this._id];
+        return [ this.bookCopy, this._id];
     }
     checkAvailability(){
         return this.isAvailble;
     }
 
     removeBook(){
-        this.bookCopyId = undefined;
+        this.bookCopy = null;
         this.isAvailble = true;
+    }
+    getBookCopy(){
+        return this.bookCopy;
     }
 
 }

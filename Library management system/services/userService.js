@@ -12,8 +12,14 @@ class UserService{
         return User.createUser(userName);
     }
 
-    getUser(users, userId){
-       return  users.find((user)=> user.getUserId() == userId);
+    getUser(users, userId) {
+        let user = users.find((user) => user.getUserId() == userId);
+        if (user) {
+            return user;
+        }
+        else {
+            throw "Invalid User Id";        // extra error added;
+        }
     }
     
 }

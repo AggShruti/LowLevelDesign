@@ -21,7 +21,13 @@ class BookCopyService{
     }
     
     getBook(bookCopies, book_id){
-        return bookCopies.find((copy)=> copy._id == book_id);
+        let bookCopy = bookCopies.find((copy)=> copy._id == book_id);
+        if(bookCopy){
+            return bookCopy;
+        }
+        else{
+            throw "Invalid Book ID";
+        }
     }
     
     getBookCopiesByIds(allBookCopies, bookCopyIds){

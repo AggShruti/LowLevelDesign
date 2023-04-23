@@ -9,9 +9,23 @@ let BookCopyServiceInst = require("./bookCopyService.js").getInst();
 class BookService{
     constructor(){
     }
+
+    createBook(name, title, author, publisher){
+        return Book.createBook(name, title, author, publisher);
+    }
+
+    createBookCopies(book, noOfbookCopies){
+        return BookCopyServiceInst.createBookCopies(book, noOfbookCopies);
+    }
+
+    addBookCopiesToBook(bookCopies, book){
+        let bookCopyIds = bookCopies.map((copy)=> copy.getBookCopyId());
+        book.addBookCopyIds(bookCopyIds);
+    }
+
     createBookAndCopies( name, title, author, publisher, noOfbookCopies){
-        let book = Book.createBook(name, title, author, publisher);
-        let bookCopies = BookCopyServiceInst.createBookCopies(book, noOfbookCopies);
+        let book = this.createBook(name, title, author, publisher);
+        let bookCopies = this.createBookCopies(book, noOfbookCopies);
         return [book, bookCopies];
     }
 

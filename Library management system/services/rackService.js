@@ -15,14 +15,17 @@ class RackService{
         return Rack.createRack();
     }
 
-    addBookCopyToRack(rack, bookCopyId){
-        return rack.addBookToRack(bookCopyId);
+    addBookCopyToRack(rack, bookCopy){
+        return rack.addBookToRack(bookCopy);
     }
 
-    addBookCopiesToRacks(racks, bookCopies){
+    addBookCopiesToRacks( racks, bookCopies){
+        console.log(bookCopies)
+        console.log(racks);
         let rackBookMapping = [];
         for(let copyNo = 0; copyNo< bookCopies.length; ++copyNo){
-            rackBookMapping.push(this.addBookCopyToRack(racks[copyNo], bookCopies[copyNo].getBookCopyId()));
+            rackBookMapping.push(this.addBookCopyToRack(racks[copyNo], bookCopies[copyNo]));
+            
 
         }
         return rackBookMapping;

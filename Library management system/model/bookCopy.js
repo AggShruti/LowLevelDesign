@@ -17,6 +17,9 @@ class BookCopy{
         this.isBorrowed = true;
         this.dueDate = dueDate;
     }
+    getBookId(){
+        return this.bookId;
+    }
   
 }
 

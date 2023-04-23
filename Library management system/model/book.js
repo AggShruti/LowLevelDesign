@@ -7,18 +7,24 @@ class Book{
         this.publisher = publisher;
     }
     static books = 0;
-    bookCopies = [];
+    bookCopyIds = [];
     misllaneous;    // to add other attributs for book
 
     static createBook(name, title, author, publisher){
         return new Book(name, title, author, publisher);
     }
 
-    addBookCopies(copyIds){
-        copyIds.map((copy)=> this.bookCopies.push(copy));
+    addBookCopyIds(copyIds){
+        this.bookCopyIds = this.bookCopyIds.concat(copyIds);
     }
     getBookId(){
         return this._id;
+    }
+    getBookCopyIds(){
+        return this.bookCopyIds;
+    }
+    removeBookCopy(copyId){
+        this.bookCopyIds = this.bookCopyIds.filter(bookCopyId=>{bookCopyId != copyId})
     }
 
 }

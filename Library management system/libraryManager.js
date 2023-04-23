@@ -4,6 +4,7 @@ let BookServiceInst = require("./services/bookService.js").getInst();
 let BookCopyServiceInst = require("./services/bookCopyService.js").getInst();
 let UserServiceInst = require("./services/userService.js").getInst();
 let Error = require("./exceptionHandling").Error;
+let data = require("./contants.json");
 
 class LibraryManager{
     constructor(){
@@ -12,7 +13,6 @@ class LibraryManager{
     rackToBookMapping={};
     bookToRackMapping={};
     bookCopies = [];
-    books = [];
     createLibrary(numberOfRacks){
         this.library = LibraryServiceInst.createLibrary();
         this.createNRackInLibrary(this.library, numberOfRacks);
@@ -30,14 +30,26 @@ class LibraryManager{
         }
     }
 
-    updateRackToBookMapping(rackBookMap){
-        for(let map = 0; map<rackBookMap.length; ++map){
-            this.rackToBookMapping[rackBookMap[map][0]] = rackBookMap[map][1];
+    updateRackToBookMapping(rackBookMap) {
+        try {
+            for (let map = 0; map < rackBookMap.length; ++map) {
+                let bookCopy = rackBookMap[map][0];
+                this.rackToBookMapping[rackBookMap[map][1]] = bookCopy.getBookCopyId();
+            }
+        }
+        catch (err) {
+            throw err;
         }
     }
-    updateBookToRackMapping(rackBookMap){
-        for(let map = 0; map<rackBookMap.length; ++map){
-            this.bookToRackMapping[rackBookMap[map][1]] = rackBookMap[map][0];
+    updateBookToRackMapping(rackBookMap) {
+        try {
+            for (let map = 0; map < rackBookMap.length; ++map) {
+                let bookCopy = rackBookMap[map][0];
+                this.bookToRackMapping[bookCopy.getBookCopyId()] = rackBookMap[map][1];
+            }
+        }
+        catch (err) {
+            throw err;
         }
     }
     updateBookCopies(bookCopies){
@@ -45,53 +57,73 @@ class LibraryManager{
             this.bookCopies.push(copy);
         })
     }
-    updateBooksInLibrary(book){
-        this.books.push(book);
-    }
+
 
     addBookToLibrary( name, title, author, publisher, noOfBookCopies) {
         try {
             let racks = LibraryServiceInst.getAvailableRacks(this.library, noOfBookCopies);
 
             let [book, bookCopies] = BookServiceInst.createBookAndCopies(name, title, author, publisher, noOfBookCopies);
+            BookServiceInst.addBookCopiesToBook(bookCopies, book);
             this.updateBookCopies(bookCopies);
-            this.updateBooksInLibrary(book);
+            LibraryServiceInst.addBooksToLibrary(this.library, book);
             let rackBookMap = RackServiceInst.addBookCopiesToRacks(racks, bookCopies);
-            console.log(rackBookMap);
             this.updateRackToBookMapping(rackBookMap);
             this.updateBookToRackMapping(rackBookMap);
-            console.log(this.bookToRackMapping);
+            console.log(this.library);
         }
         catch (err) {
             Error(err);
         }
     }
 
-    getRackForBook(bookCopyId){
-        return this.bookToRackMapping[bookCopyId];
+    getRackIdForBook(bookCopyId){
+        let rack = this.bookToRackMapping[bookCopyId];
+        if(rack){
+            return rack;
+        }
+        else{
+            throw "Invalid Book Copy ID";
+        }
     }
 
-    removeBookFromRack(bookCopyId, rackId){
+    updateMapping(bookCopyId, rackId){
         delete this.bookToRackMapping[bookCopyId];
         delete this.rackToBookMapping[rackId];
     }
 
-    removeBookCopy(bookCopyId){
-        let rackId = this.getRackForBook(bookCopyId);
-        let rack = this.library.getRackById(rackId);
-        rack.removeBook();
-        this.removeBookFromRack(bookCopyId, rack._id);
-        console.log(this.library);
+    removeBookCopy(bookCopyId) {
+        try {
+            let rackId = this.getRackIdForBook(bookCopyId);
+            let rack = this.library.getRackById(rackId);
+            let bookCopy = rack.getBookCopy();
+            let bookId = bookCopy.getBookId();
+            LibraryServiceInst.removeBookCopy(this.library, bookId, rack);
+            this.updateMapping(bookCopyId, rack._id);
+            console.log(this.library);
+        }
+        catch (err) {
+            Error(err);
+        }
     }
-    borrowBook(users, book_id, user_id, due_date){
-        let user = UserServiceInst.getUser(users, user_id);
-        console.log(user);
-        let bookCopy = BookCopyServiceInst.getBook(this.bookCopies, book_id);
-        console.log(bookCopy);
-        user.updateBorrowedBook(book_id);
-        bookCopy.borrowBookCopy(due_date);
-        console.log(user)
-        console.log(bookCopy);
+
+    borrowBook(users, book_id, user_id, due_date) {
+        try {
+            let user = UserServiceInst.getUser(users, user_id);
+            let bookCopies = user.getBorrowedCopies();
+            if(bookCopies.length >= data.NUMBER_OF_BOOKS_ALLOWED_PER_USER){
+                throw "Overlimit";
+            }
+            let bookCopy = BookCopyServiceInst.getBook(this.bookCopies, book_id);
+            console.log(bookCopy);
+            user.updateBorrowedBook(book_id);
+            bookCopy.borrowBookCopy(due_date);
+            console.log(user)
+            console.log(bookCopy);
+        }
+        catch (err) {
+            Error(err);
+        }
     }
     
     getBookCopy(bookCopyId){

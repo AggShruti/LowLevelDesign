@@ -11,30 +11,49 @@ class LibraryService{
         return library.createLibrary();
     }
     addRacktoLibrary(library, rack){
-        library.addRacks(rack);
+        library.addRack(rack);
     }
 
-    getAvailableRacks(library, requiredRacks){
-        let racks = library.getRacks();
-        let allAvailableRacks = [];
-        let requiredRacksCount = requiredRacks;
-        for(let rackNo=0; (rackNo<racks.length && requiredRacksCount >0) ; ++rackNo){
-            let rack = racks[rackNo];
-            if(rack.checkAvailability()){
-                requiredRacksCount -= 1;
-                allAvailableRacks.push(rack);
+    addBooksToLibrary(library, book){
+        let bookCopyIds = book.getBookCopyIds();
+        library.addBookCopiesToRack(bookCopyIds.length);
+        library.addBook(book);
+    }
+
+    getAvailableRacks(library, requiredRacks) {
+        console.log("hi")
+        try {
+            let allAvailableRacks = [];
+            let availableRackCount = library.getRacksAvailablity();
+            if (availableRackCount < requiredRacks) {
+                throw "Racks Not Available";
             }
-        }
-        console.log(allAvailableRacks.length);
-        console.log(requiredRacks);
-        if(allAvailableRacks.length == requiredRacks){
+            let allRacks = library.getRacks();
+            console.log(allRacks);
+            for (let rackId in allRacks) {
+                console.log(allRacks[rackId]);
+                if (allRacks[rackId].checkAvailability()) {
+                    allAvailableRacks.push(allRacks[rackId]);
+                }
+            }
             return allAvailableRacks;
         }
-        else{
-            throw "Racks Not Available";
+        catch (err) {
+            throw err;
         }
+
     }
-    
+    removeBookCopy(library, bookId, rack){
+        let book = library.getBook(bookId);
+
+        if(book.getBookCopyIds().length === 0){
+            library.removeBook(bookId);
+        }
+        book.removeBookCopy();
+        library.increaseRackAvailability();
+        rack.removeBook();
+
+    }
 
 }
 
